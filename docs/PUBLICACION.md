@@ -1,14 +1,14 @@
 # DATALICITA · Publicación gratuita
 
-El sitio público se prepara para **GitHub Pages**, sin comprar dominio ni contratar servicios de pago. La dirección prevista del proyecto es `https://peruonchain-ship-it.github.io/MOLT/`; no debe describirse como activa hasta que responda y se compruebe su contenido.
+El sitio público está publicado en **GitHub Pages**, sin comprar dominio ni contratar servicios de pago: **https://peruonchain-ship-it.github.io/MOLT/**. Se comprobó respuesta HTTPS 200 y contenido DATALICITA. GitHub informa `status: built`, HTTPS obligatorio y fuente `gh-pages` / `(root)`.
 
 ## Activación en GitHub
 
-La conexión disponible puede leer el repositorio, pero GitHub rechazó activar Pages mediante la API con **HTTP 403: Resource not accessible by integration**. Hace falta que un administrador lo active desde:
+Durante la preparación, GitHub rechazó la activación mediante API con **HTTP 403: Resource not accessible by integration**. Después el ajuste quedó activado y se verificó el sitio publicado. **No queda pendiente activar Pages.** Si hace falta revisar ese ajuste en el futuro, está en:
 
 `https://github.com/peruonchain-ship-it/MOLT/settings/pages`
 
-Cuando las ramas estén subidas:
+Configuración actual:
 
 1. En **Build and deployment**, elige **Deploy from a branch**.
 2. Selecciona **gh-pages**, carpeta **/(root)**.
@@ -57,7 +57,7 @@ No se ha verificado una propiedad de Search Console ni confirmado presencia en r
 - 62 pruebas automatizadas pasaron; se comprobó también la portada estática en escritorio y móvil, sus recursos, enlaces internos y comportamiento de las preguntas frecuentes.
 - El panel privado pasó la comprobación de navegador con los registros reales existentes, sin publicar esos datos en la portada.
 - Las ramas `main` y `gh-pages` se subieron al repositorio. La actualización estática es repetible y no genera commits duplicados cuando no hay cambios.
-- GitHub rechazó tanto la activación por workflow como la activación desde rama mediante API con HTTP 403. Esto requiere cambiar el ajuste en la cuenta de GitHub; repetir la petición con el mismo acceso no lo resuelve.
+- La activación por API fue rechazada inicialmente con HTTP 403; posteriormente se confirmó la configuración habilitada y el sitio publicado mediante consulta a Pages y solicitud HTTPS 200 a la portada. No se atribuye a una petición que falló el cambio de permisos o configuración.
 - El contenedor opcional no se completó en este entorno por un fallo de DNS de la red de Docker al descargar dependencias. No es necesario para la publicación gratuita estática y no se presenta como despliegue validado.
 
 ## Aplicación completa y dominio propio, en el futuro
