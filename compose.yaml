@@ -1,0 +1,36 @@
+services:
+  web:
+    build: .
+    init: true
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      MOLT_HOST: 0.0.0.0
+      MOLT_PORT: '8000'
+      MOLT_DATA_DIR: /data
+      MOLT_SECURE_COOKIES: 'true'
+      MOLT_PUBLIC_URL: https://${MOLT_SITE_DOMAIN:?Configura un dominio propio ya registrado}
+    volumes:
+      - radar_data:/data
+    expose:
+      - '8000'
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      web:
+        condition: service_healthy
+    environment:
+      MOLT_SITE_DOMAIN: ${MOLT_SITE_DOMAIN:?Configura un dominio propio ya registrado}
+    ports:
+      - '80:80'
+      - '443:443'
+      - '443:443/udp'
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - tls_data:/data
+      - tls_config:/config
+volumes:
+  radar_data:
+  tls_data:
+  tls_config:

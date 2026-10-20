@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="theme-color" content="#163e32">
+  <meta name="description" content="Tu radar privado de oportunidades para eventos y servicios audiovisuales en Perú.">
+  <title>DATALICITA · Radar privado de eventos</title>
+  <link rel="icon" href="/static/mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/styles.css">
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+<div id="auth-screen" class="auth-layout" hidden>
+  <section class="auth-story">
+    <a class="brand" href="/" aria-label="DATALICITA inicio"><img src="/static/mark.svg" alt="" width="35" height="35">datalicita<span>↗</span></a>
+    <div class="auth-copy"><span class="eyebrow light">TU NEGOCIO. TU SIGUIENTE OPORTUNIDAD.</span>
+      <h1>Menos búsquedas.<br>Más posibilidades.</h1>
+      <p>El radar que conecta tu experiencia con los próximos eventos del Perú.</p>
+      <div class="orbit-art" aria-hidden="true"><div class="orbit one"></div><div class="orbit two"></div><div class="orbit three"></div><span class="orbit-dot a"></span><span class="orbit-dot b"></span><span class="orbit-center">↗</span><span class="orbit-label">UNA NUEVA CONEXIÓN</span></div>
+    </div>
+    <p class="auth-footer">Lima · Cusco · Trujillo · Arequipa <span>Hecho para avanzar.</span></p>
+  </section>
+  <main class="auth-form-wrap">
+    <div class="privacy-pill"><span class="tiny-dot"></span> ESPACIO PRIVADO</div>
+    <form id="auth-form" class="auth-form">
+      <p class="eyebrow">BIENVENIDO A TU RADAR</p>
+      <h2 id="auth-title">Un buen negocio<br>empieza por aquí.</h2>
+      <p id="auth-description" class="muted">Ingresa a tu espacio de oportunidades.</p>
+      <div id="setup-field" hidden><label for="setup-code">Código de instalación</label><input id="setup-code" autocomplete="off" placeholder="Código de un solo uso"><p class="field-help">En la consola del servidor ejecuta <code>uv run python -m molt setup-code</code>. Solo se usa para crear tu acceso.</p></div>
+      <label for="username">Usuario</label><input id="username" autocomplete="username" required placeholder="Tu usuario" maxlength="80">
+      <label for="password">Contraseña</label><input id="password" type="password" autocomplete="current-password" required placeholder="Tu contraseña" maxlength="200">
+      <p id="auth-error" class="error-text" role="alert"></p>
+      <button id="auth-submit" class="button primary full" type="submit">Entrar a mi radar <span>↗</span></button>
+      <p class="auth-note">Acceso exclusivo. Tus búsquedas y seguimiento se guardan en tu instancia privada.</p>
+    </form>
+    <p class="auth-bottom">DATALICITA / RADAR DE OPORTUNIDADES</p>
+  </main>
+</div>
+
+<div id="application" class="app-shell" hidden>
+  <aside class="sidebar">
+    <a class="brand" href="/" aria-label="DATALICITA inicio"><img src="/static/mark.svg" alt="" width="32" height="32">datalicita<span>↗</span></a>
+    <div class="workspace-label"><span class="tiny-dot"></span> MI ESPACIO PRIVADO</div>
+    <nav aria-label="Navegación principal">
+      <p class="nav-label">TU NEGOCIO</p>
+      <button class="nav-item active" data-view="radar"><span class="nav-symbol">◉</span><span>Radar de oportunidades</span><span class="nav-arrow">↗</span></button>
+      <button class="nav-item" data-view="followup"><span class="nav-symbol">▤</span><span>Mi seguimiento</span><span id="followup-count" class="nav-count">0</span></button>
+      <button class="nav-item" data-view="mail"><span class="nav-symbol">✉</span><span>Resúmenes por correo</span></button>
+      <p class="nav-label nav-label-second">MI ESPACIO</p>
+      <button class="nav-item" data-view="settings"><span class="nav-symbol">⚙</span><span>Preferencias</span></button>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="source-mini"><span class="source-symbol">↗</span><p>De la fuente a tu radar.<small>Datos abiertos OECE / SEACE</small></p><span id="source-dot" class="tiny-dot"></span></div>
+      <div class="user-mini"><span class="avatar">D</span><div><strong id="account-name">Mi cuenta</strong><small>Acceso privado</small></div><button id="logout" class="icon-button" title="Cerrar sesión" aria-label="Cerrar sesión">↪</button></div>
+    </div>
+  </aside>
+
+  <div class="main-shell">
+    <header class="topbar"><div class="breadcrumb">Mi espacio <span>/</span> <strong id="breadcrumb">Radar de oportunidades</strong></div><div class="topbar-right"><span id="today-label" class="date-label"></span><span class="private-label">◈ Privado</span><button id="mobile-logout" class="icon-button mobile-only" aria-label="Cerrar sesión móvil">↪</button></div></header>
+    <main class="main-content">
+      <div id="radar-view">
+        <section class="page-heading"><div><p class="eyebrow">CONEXIONES QUE SE CONVIERTEN EN NEGOCIOS</p><h1 id="page-title">Tu próximo evento empieza aquí<span>.</span></h1><p id="page-description" class="page-description">Encuentra oportunidades que conectan con lo que mejor sabes hacer.</p></div><button id="sync-button" class="button primary"><span class="sync-icon">↻</span> Actualizar radar</button></section>
+
+        <div class="coverage-row"><div class="coverage-label"><span class="tiny-dot"></span> TU ZONA DE OPORTUNIDADES</div><div class="city-chips" id="city-chips"><span>Lima</span><span>Cusco</span><span>Trujillo</span><span>Arequipa</span></div><span class="coverage-source">Fuente oficial · OECE / SEACE</span></div>
+
+        <section class="metrics" aria-label="Resumen de oportunidades">
+          <button class="metric" data-class=""><span class="metric-label">En tu radar <span>↗</span></span><strong id="stat-total">—</strong><small>Coincidencias en tus zonas</small></button>
+          <button class="metric" data-class="open"><span class="metric-label">Vigentes según fuente <span class="metric-dot green"></span></span><strong id="stat-open">—</strong><small>Estado activo y cierre futuro</small></button>
+          <button class="metric" data-class="review"><span class="metric-label">Para revisar <span class="metric-dot amber"></span></span><strong id="stat-review">—</strong><small>La vigencia necesita confirmación</small></button>
+          <button class="metric" data-class="historical"><span class="metric-label">Compradores históricos <span>↗</span></span><strong id="stat-historical">—</strong><small>Contrataciones, no ofertas abiertas</small></button>
+        </section>
+
+        <div class="radar-grid">
+          <section class="opportunities-panel">
+            <div class="section-title-row"><div><h2 id="list-title">Oportunidades para tu negocio <span id="result-count" class="count-pill">0</span></h2><p>Explora, revisa el alcance y da el siguiente paso.</p></div><a id="export-button" class="button secondary small" href="/api/export.xlsx">↓ <span>Descargar Excel</span></a></div>
+            <div class="tabs" role="tablist" aria-label="Estado de contratación"><button class="tab active" role="tab" aria-selected="true" data-class="">Todas</button><button class="tab" role="tab" aria-selected="false" data-class="open">Vigentes <span id="tab-open">0</span></button><button class="tab" role="tab" aria-selected="false" data-class="review">Por verificar</button><button class="tab" role="tab" aria-selected="false" data-class="historical">Históricas</button></div>
+            <div class="filters"><div class="search-box"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Buscar servicio, entidad o palabra clave…" aria-label="Buscar oportunidades"><kbd>/</kbd></div><select id="city-filter" aria-label="Filtrar por zona"><option value="">Todas las zonas</option><option>Lima</option><option>Cusco</option><option>Trujillo</option><option>Arequipa</option><option value="unknown">Sin ubicación confirmada</option></select><button id="more-filters" class="button secondary square" title="Más filtros" aria-label="Más filtros" aria-expanded="false">☷</button></div>
+            <div id="advanced-filters" class="advanced-filters" hidden><label>Servicio<select id="family-filter"><option value="">Todas las familias</option></select></label><label>Seguimiento<select id="stage-filter"><option value="">Todas las etapas</option><option>Pendiente</option><option>Revisar</option><option>Cotizar</option><option>Presentada</option><option>Descartada</option></select></label><label>Ordenar<select id="sort-filter"><option value="recent">Publicación reciente</option><option value="score">Afinidad con tu rubro</option><option value="deadline">Fecha de cierre</option><option value="amount">Monto (PEN primero)</option></select></label><label class="checkbox-line"><input type="checkbox" id="include-unknown"> Incluir sin ubicación</label><button id="clear-filters" class="text-button">Limpiar filtros</button></div>
+            <div id="list-loading" class="list-loading" hidden><span class="spinner"></span> Buscando coincidencias…</div>
+            <div id="opportunities-list" class="opportunities-list" aria-live="polite"></div>
+            <div class="pagination"><span id="pagination-label">Sin resultados</span><div><button id="previous-page" class="button secondary small" disabled aria-label="Página anterior">←</button><button id="next-page" class="button secondary small" disabled aria-label="Página siguiente">→</button></div></div>
+          </section>
+
+          <aside class="insights">
+            <section class="insight-card feature-card"><span class="feature-icon">✳</span><p class="eyebrow">MÁS ALLÁ DEL TÍTULO</p><h2>El equipo puede estar<br>dentro del evento.</h2><p>Una ceremonia o una feria puede incluir pantallas, sonido y operación técnica. Tu radar también busca en ítems y documentos legibles.</p><div class="feature-stat"><strong id="stat-integral">—</strong><span>contratos integrales<br>en tus zonas</span></div><button id="integral-filter" class="text-button">Explorar producción integral <span>↗</span></button></section>
+            <section class="insight-card"><div class="aside-title"><h3>La fuente, a la vista</h3><span id="sync-status-pill" class="badge neutral">Sin consultar</span></div><p id="source-message" class="aside-copy">Conecta con las oportunidades publicadas por el Estado.</p><dl class="source-details"><div><dt>Última consulta completa</dt><dd id="source-last">Pendiente</dd></div><div><dt>Ventana de búsqueda</dt><dd id="source-window">90 días</dd></div><div><dt>Registros revisados</dt><dd id="source-scanned">—</dd></div></dl><div id="source-progress" class="source-progress" hidden><span class="spinner"></span><span id="source-progress-label">Consultando…</span></div></section>
+            <section class="insight-card"><div class="aside-title"><h3>Dentro del requerimiento</h3><span>▧</span></div><p class="aside-copy" id="document-summary">Revisión de documentos oficiales.</p><div class="document-counts"><div><strong id="docs-read">0</strong><small>con texto</small></div><div><strong id="docs-pending">0</strong><small>pendientes</small></div><div><strong id="docs-manual">0</strong><small>rev. manual</small></div></div><button id="process-documents" class="text-button">Revisar pendientes <span>↗</span></button></section>
+            <p class="aside-footnote">Una coincidencia es un punto de partida. Confirma el cronograma, los requisitos y el lugar del servicio en la fuente oficial.</p>
+          </aside>
+        </div>
+      </div>
+
+      <section id="mail-view" hidden><div class="page-heading"><div><p class="eyebrow">LAS NOVEDADES LLEGAN A TI</p><h1>Tu radar, en tu bandeja<span>.</span></h1><p class="page-description">Un resumen privado con las novedades y un Excel para trabajar.</p></div></div><div class="settings-grid"><div class="settings-card"><span class="large-icon">✉</span><h2>Resumen diario de oportunidades</h2><p class="muted" id="mail-destination">Configura tu correo en Preferencias.</p><div id="mail-state" class="notice"></div><dl class="source-details" id="mail-info"></dl><div class="button-row"><button id="preview-mail" class="button secondary">Ver próximo resumen</button><button id="send-mail" class="button primary">Enviar resumen ahora ↗</button></div><p class="field-help">Incluye coincidencias nuevas y cambios. Las vigentes que vencen en menos de 72 horas pueden generar un recordatorio diario. Se excluyen descartadas e históricas, salvo que actives estas últimas.</p></div><div class="settings-card"><p class="eyebrow">ANTES DE ENVIAR</p><h2>Todo bajo tu control.</h2><ol class="steps"><li><strong>Comprueba la fuente</strong><span>Se necesita una consulta completa en las últimas 24 horas.</span></li><li><strong>Revisa tu destino</strong><span>Solo se envía al correo guardado en tus preferencias.</span></li><li><strong>Activa tu proveedor</strong><span>Configura la clave de Resend y un remitente autorizado de forma segura en el servidor.</span></li></ol><button class="text-button" data-view="settings">Ir a Preferencias ↗</button></div></div><div id="mail-preview" class="settings-card" hidden></div></section>
+
+      <section id="settings-view" hidden><div class="page-heading"><div><p class="eyebrow">UN RADAR A TU MEDIDA</p><h1>Tu negocio marca el rumbo<span>.</span></h1><p class="page-description">Elige dónde buscar y cómo recibir las oportunidades.</p></div></div><form id="settings-form"><div class="settings-grid"><div class="settings-card"><h2>Territorio y búsqueda</h2><p class="muted">La dirección del comprador se etiqueta como referencia cuando no hay lugar de prestación.</p><fieldset><legend>Zonas de interés</legend><div class="settings-cities" id="settings-cities"></div></fieldset><label for="lookback-days">Ventana de consulta</label><select id="lookback-days"><option value="30">Últimos 30 días</option><option value="60">Últimos 60 días</option><option value="90">Últimos 90 días</option><option value="180">Últimos 180 días</option><option value="365">Último año</option></select><p class="field-help">Según el período de licitación que filtra la API; no incluye todo el histórico del Estado.</p><label for="scan-hours">Actualizar automáticamente</label><select id="scan-hours"><option value="1">Cada hora</option><option value="3">Cada 3 horas</option><option value="6">Cada 6 horas</option><option value="12">Cada 12 horas</option><option value="24">Una vez al día</option></select><p id="worker-state" class="field-help"></p></div><div class="settings-card"><h2>Correos y Excel</h2><label for="email-to">Correo de destino</label><input id="email-to" type="email" autocomplete="email" placeholder="tu@correo.com"><label for="digest-time">Hora del resumen · Perú (UTC−5)</label><input id="digest-time" type="time" value="08:00" required><label class="checkbox-line settings-check"><input id="email-enabled" type="checkbox"> Activar resumen diario</label><label class="checkbox-line settings-check"><input id="include-historical" type="checkbox"> Incluir compras históricas en los correos</label><div id="mail-config-note" class="notice"></div><p class="field-help">Las claves se configuran en el servidor. Nunca se muestran ni se guardan en este formulario.</p></div></div><div class="save-settings"><p id="settings-message" class="muted" role="status"></p><button class="button primary" type="submit">Guardar preferencias ↗</button></div></form><form id="password-form" class="settings-card password-card"><h2>Seguridad de tu acceso</h2><div class="password-grid"><label>Contraseña actual<input id="current-password" type="password" autocomplete="current-password" required></label><label>Nueva contraseña<input id="new-password" type="password" autocomplete="new-password" minlength="12" required></label><button class="button secondary" type="submit">Actualizar contraseña</button></div><p class="field-help">Mínimo 12 caracteres. Se cerrarán las otras sesiones.</p></form></section>
+      <footer class="main-footer"><span>DATALICITA · Cada conexión cuenta.</span><span>Información pública. Seguimiento privado.</span></footer>
+    </main>
+  </div>
+</div>
+
+<dialog id="detail-dialog" class="detail-dialog"><div class="dialog-header"><span class="eyebrow">EXPEDIENTE DE OPORTUNIDAD</span><button id="close-detail" class="icon-button" aria-label="Cerrar detalle">×</button></div><div id="detail-content"></div></dialog>
+<div id="toast" class="toast" role="status" hidden></div>
+<div id="initial-loading" class="initial-loading"><img src="/static/mark.svg" alt="" width="36" height="36"><span>Preparando tu radar…</span></div>
+</body>
+</html>

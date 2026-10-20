@@ -1,0 +1,3 @@
+/* Use locally installed fonts: the private panel makes no third-party font requests. */
+@font-face{font-family:Inter;src:local('Inter');font-display:swap;font-weight:100 900}
+@font-face{font-family:MoltSymbols;src:local('DejaVu Sans');unicode-range:U+2190-21FF,U+2300-23FF,U+2500-27FF}
