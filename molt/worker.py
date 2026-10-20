@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from .config import TIMEZONE
+from .db import utcnow
 from .documents import process_documents
 from .mail import send_digest
 from .matching import parse_date
@@ -66,3 +67,23 @@ class Worker:
             except Exception:
                 log.exception("Fallo en tarea programada")
             self.stop.wait(60)
+
+
+def collect_once(db):
+    """One external scheduled run, independent of the web server's lifetime."""
+    owner = db.lease("collector", seconds=3000)
+    if not owner:
+        return {"status": "busy"}
+    try:
+        db.save_settings({"collector_started": utcnow(), "collector_status": "running"})
+        Worker(db).tick()
+        failed = db.sync_status()["status"] in ("error", "partial", "interrupted")
+        status = "error" if failed else "complete"
+        db.save_settings({"collector_finished": utcnow(), "collector_status": status})
+        return {"status": status}
+    except Exception:
+        # Connection errors must not expose deployment secrets in public workflow logs.
+        db.save_settings({"collector_finished": utcnow(), "collector_status": "error"})
+        return {"status": "error"}
+    finally:
+        db.release("collector", owner)

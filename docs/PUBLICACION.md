@@ -22,6 +22,8 @@ La rama `gh-pages` contiene únicamente HTML, CSS, icono, robots.txt y sitemap.x
 
 El código de la aplicación se conserva en `main`. El panel necesita ejecutar Python y almacenar datos; GitHub Pages sirve archivos estáticos y no ejecuta ese backend. Por eso la portada gratuita explica que el panel todavía debe conectarse y no muestra un acceso roto como si funcionara.
 
+Para publicar el panel privado con Render, Neon y consultas independientes de la web, sigue [la guía de alojamiento gratuito](ALOJAMIENTO_GRATUITO.md).
+
 Para reconstruir el sitio:
 
 ```bash

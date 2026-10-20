@@ -1,6 +1,6 @@
 # Validación de MOLT
 
-Instancia de desarrollo preparada el **19 de octubre de 2026 (Perú)**.
+Instancia de desarrollo preparada el **19 de octubre de 2026 (Perú)** y ampliada el **20 de octubre de 2026** para alojamiento privado.
 
 ## Datos oficiales
 
@@ -14,7 +14,7 @@ Instancia de desarrollo preparada el **19 de octubre de 2026 (Perú)**.
 
 ## Pruebas
 
-- **52 pruebas automatizadas** de autenticación, CSRF, filtros, clasificación, geografía, contratos integrales con pantallas en un TDR de prueba, persistencia de notas, paginación/reanudación, enlaces permitidos, Excel, programación en hora de Perú y envío simulado.
+- **68 pruebas automatizadas con SQLite y 68 con PostgreSQL 17 real** de autenticación, CSRF, filtros, clasificación, geografía, contratos integrales con pantallas en un TDR de prueba, persistencia tras reiniciar, paginación/reanudación, enlaces permitidos, Excel, programación en hora de Perú, exclusión mutua y envío simulado.
 - Prueba de navegador con registros públicos reales en una **base temporal**, escritorio y móvil, sin modificar la cuenta real. Comprueba creación de acceso, búsqueda, detalle, seguimiento, Excel filtrado, preferencias, vista previa de correo y cierre de sesión.
 - Comprobación real del servidor con `/health`. Instalación reproducible con `uv.lock` y scripts de instalación/arranque.
 - Excel generado a partir de los registros reales de la instancia, con fuente y alcance incluidos en otra hoja.
@@ -24,6 +24,6 @@ Instancia de desarrollo preparada el **19 de octubre de 2026 (Perú)**.
 
 1. **Cola de documentos:** `prod1.seace.gob.pe` fue bloqueado inicialmente; después respondió y se verificó lectura real de PDFs. Su permiso quedó guardado en el borrador del entorno. La cola restante continúa en segundo plano; los errores iniciales pueden reintentarse desde la ficha. No se ha revisado toda la cola. Escaneados y ZIP requieren revisión manual; las lecturas parciales se indican y el límite actual es 160 páginas/400.000 caracteres por PDF.
 2. **Correos reales:** el destinatario indicado se guardó en configuración local privada. Falta una `RESEND_API_KEY` y `MOLT_MAIL_FROM` autorizado. No se han enviado correos reales ni se ha verificado llegada a Gmail. El resumen automático permanece desactivado hasta su configuración.
-3. **Uso permanente:** requiere un servidor privado encendido con HTTPS. No se ha publicado en un dominio ni desplegado como servicio permanente. Los datos e instrucciones del entorno cloud están preparados para revisión/publicación; esa publicación no equivale a desplegar una aplicación web permanente.
+3. **Panel privado en Internet:** se prepararon `render.yaml`, base PostgreSQL persistente y workflow de GitHub Actions. Faltan las cuentas gratuitas del propietario y configurar la conexión de base de datos de forma segura. Ver [alojamiento gratuito](ALOJAMIENTO_GRATUITO.md). La portada pública sí está publicada en GitHub Pages; el panel privado todavía no. Guardar/publicar el entorno cloud de desarrollo no despliega ese panel.
 
 No se incluyen ejemplos inventados en la base operativa. Las fixtures sintéticas solo existen en las pruebas.

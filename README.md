@@ -2,6 +2,8 @@
 
 **Nombre público: DATALICITA.** La portada está en `/` y el radar privado en `/app`. La publicación gratuita y la configuración para Google se describen en [docs/PUBLICACION.md](docs/PUBLICACION.md). El módulo Python y las variables `MOLT_*` conservan su nombre para mantener compatibilidad.
 
+**Para usar el radar privado en Internet:** sigue [la guía de alojamiento gratuito](docs/ALOJAMIENTO_GRATUITO.md). Incluye Render, PostgreSQL persistente en Neon y consultas programadas con GitHub Actions que funcionan sin este chat y sin una IA. La portada de GitHub Pages ya publicada no ejecuta el panel privado.
+
 Aplicación privada para encontrar y seguir contrataciones relacionadas con eventos, pantallas LED y servicios audiovisuales en Perú. Primera cobertura: **Lima, Cusco, Trujillo y Arequipa**.
 
 Incluye panel en español, filtros, lectura de registros OCDS, coincidencias en contratos integrales, extracción de texto de PDFs oficiales, seguimiento comercial, notas privadas, Excel y resúmenes por correo con adjunto.

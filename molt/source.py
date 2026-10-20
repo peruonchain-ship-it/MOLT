@@ -117,8 +117,11 @@ class SyncService:
                     latest = previous["source_latest"]
                 run_id = conn.execute("""INSERT INTO sync_runs
                     (started_at,status,pages,scanned,matched,window_start,window_end,next_url,source_latest)
-                    VALUES (?,?,?,?,?,?,?,?,?)""", (utcnow(), "running", pages, scanned, matched, start, end, url, latest)).lastrowid
+                    VALUES (?,?,?,?,?,?,?,?,?) RETURNING id""",
+                    (utcnow(), "running", pages, scanned, matched, start, end, url, latest)).fetchone()[0]
             visited = set()
+            with self.db.connect() as conn:
+                with_documents = {row[0] for row in conn.execute("SELECT DISTINCT ocid FROM documents")}
             for _ in range(max_pages):
                 if not url:
                     break
@@ -131,7 +134,9 @@ class SyncService:
                     release = record.get("compiledRelease")
                     if not isinstance(release, dict) or not release.get("ocid"):
                         raise SourceError("Un registro no contiene compiledRelease/ocid. Revisión de formato pendiente.")
-                    if save_release(self.db, release):
+                    # Avoid a database round trip for every unrelated government purchase.
+                    if ((release["ocid"] in with_documents or to_opportunity(release))
+                            and save_release(self.db, release)):
                         matched += 1
                     date = release.get("date")
                     if date and (not latest or date > latest):

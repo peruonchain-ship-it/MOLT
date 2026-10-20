@@ -95,6 +95,15 @@ function queryParams() {
   return params;
 }
 
+function automationLabel(automation) {
+  if (automation?.web_worker) return 'En el servidor · cada ' + automation.interval_hours + ' h';
+  if (!automation?.started) return 'Recolector externo pendiente de conectar';
+  const last = new Date(automation.started);
+  const stale = !Number.isFinite(last.valueOf()) || Date.now() - last.valueOf() > 3 * 3600000;
+  const status = stale ? 'Sin señal reciente' : automation.status === 'error' ? 'Última ejecución con error' : automation.status === 'running' ? 'En ejecución' : 'Recolector externo';
+  return status + ' · ' + date(automation.started, true);
+}
+
 async function refreshDashboard() {
   if (!state.csrf) return;
   const data = await api('/dashboard'); state.dashboard = data;
@@ -111,6 +120,8 @@ async function refreshDashboard() {
   $('source-message').textContent = source.message || (source.running ? 'Consultando registros oficiales. Las coincidencias aparecerán durante la lectura.' : 'Puedes consultar la fuente sin salir de tu panel.');
   $('source-last').textContent = source.last_complete ? date(source.last_complete, true) : 'Aún sin consulta completa';
   $('source-window').textContent = source.window_start ? date(source.window_start + 'T12:00:00-05:00') + ' — ' + date(source.window_end + 'T12:00:00-05:00') : 'Últimos 90 días';
+  $('source-latest').textContent = date(source.source_latest, true);
+  $('source-automation').textContent = automationLabel(source.automation);
   $('source-scanned').textContent = number(source.scanned);
   $('sync-button').disabled = !!source.running;
   $('sync-button').innerHTML = source.running ? '<span class="spinner"></span> Consultando…' : '<span class="sync-icon">↻</span> Actualizar radar';
@@ -189,7 +200,7 @@ async function loadSettings() {
   $('email-enabled').checked = settings.email_enabled; $('include-historical').checked = settings.include_historical;
   $('mail-config-note').className = 'notice' + (data.mail.configured ? '' : ' warning');
   $('mail-config-note').textContent = data.mail.configured ? 'Proveedor configurado. Puedes activar el resumen diario. La entrega se confirma al enviar.' : 'Correos pendientes de activar: configura RESEND_API_KEY y MOLT_MAIL_FROM en los ajustes seguros del servidor. El panel y Excel ya pueden utilizarse.';
-  $('worker-state').textContent = data.worker_enabled ? 'La programación funciona mientras el servidor de MOLT permanezca encendido.' : 'La tarea automática está desactivada en esta instancia. Usa actualización manual o activa el proceso de fondo.';
+  $('worker-state').textContent = automationLabel(data.automation) + '. El recolector externo comprueba el horario aproximadamente cada hora; puede demorarse. OECE determina cuándo publica sus datos.';
 }
 $('settings-form').addEventListener('submit', async (event) => {
   event.preventDefault(); const button = event.target.querySelector('button[type="submit"]'); button.disabled = true;

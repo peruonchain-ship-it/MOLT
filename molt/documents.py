@@ -96,7 +96,7 @@ def process_documents(db, limit=4, fetcher=fetch_pdf, ocid=None, force=False):
             params = (ocid, limit) if ocid else (limit,)
             docs = conn.execute("""SELECT d.* FROM documents d JOIN opportunities o ON d.ocid=o.ocid
                 WHERE d.status='pending'""" + condition + """ ORDER BY
-                CASE WHEN json_extract(o.data,'$.city') IN ('Lima','Cusco','Trujillo','Arequipa')
+                CASE WHEN """ + db.city_expression("o.") + """ IN ('Lima','Cusco','Trujillo','Arequipa')
                     THEN 0 ELSE 1 END, o.first_seen DESC,d.key LIMIT ?""", params).fetchall()
         for doc in docs:
             blocked = False

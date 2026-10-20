@@ -73,5 +73,6 @@ def dashboard(db):
         for family in item["families"]:
             stats["by_family"][family] = stats["by_family"].get(family, 0) + 1
     with db.connect() as conn:
-        stats["unlocated"] = conn.execute("SELECT COUNT(*) FROM opportunities WHERE json_extract(data,'$.city') IS NULL").fetchone()[0]
+        stats["unlocated"] = conn.execute(
+            f"SELECT COUNT(*) FROM opportunities WHERE {db.city_expression()} IS NULL").fetchone()[0]
     return stats

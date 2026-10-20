@@ -3,6 +3,7 @@ import getpass
 import json
 import os
 
+import psycopg
 import uvicorn
 
 from .auth import hash_password
@@ -15,17 +16,19 @@ from .source import SyncService
 
 
 def main():
-    parser = argparse.ArgumentParser(description="MOLT · Radar privado de oportunidades")
-    parser.add_argument("command", choices=["serve", "sync", "documents", "digest", "setup-code", "reset-password", "export"])
+    parser = argparse.ArgumentParser(description="DATALICITA · Radar privado de oportunidades")
+    parser.add_argument("command", choices=["serve", "sync", "collect", "documents", "digest", "setup-code", "reset-password", "export"])
     parser.add_argument("--limit", type=int, default=4)
     parser.add_argument("--output", default="MOLT-oportunidades.xlsx")
     args = parser.parse_args()
     config = Config.from_env()
+    if args.command == "collect" and not config.database_url:
+        parser.error("El recolector externo requiere DATABASE_URL para compartir los datos con la web.")
     db = Database(config)
     if args.command == "serve":
         from .app import create_app
         uvicorn.run(create_app(config), host=os.getenv("MOLT_HOST", "127.0.0.1"),
-                    port=int(os.getenv("MOLT_PORT", "8000")), proxy_headers=False,
+                    port=int(os.getenv("PORT", os.getenv("MOLT_PORT", "8000"))), proxy_headers=False,
                     access_log=False)
     elif args.command == "setup-code":
         if db.initialized():
@@ -42,6 +45,12 @@ def main():
             conn.execute("UPDATE users SET password_hash=? WHERE id=1", (hash_password(password),))
             conn.execute("DELETE FROM sessions")
         print("Contraseña actualizada. Todas las sesiones anteriores fueron cerradas.")
+    elif args.command == "collect":
+        from .worker import collect_once
+        result = collect_once(db)
+        print(json.dumps(result))
+        if result["status"] == "error":
+            raise SystemExit(1)
     elif args.command == "sync":
         result = SyncService(db).run()
         print(json.dumps(result, ensure_ascii=False))
@@ -65,4 +74,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except psycopg.Error:
+        raise SystemExit("No se pudo operar la base PostgreSQL. Revisa conexión, permisos y disponibilidad en el panel privado del proveedor.") from None

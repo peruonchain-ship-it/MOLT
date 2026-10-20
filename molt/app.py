@@ -2,7 +2,6 @@ import hashlib
 import hmac
 import re
 import secrets
-import sqlite3
 from contextlib import asynccontextmanager
 from typing import Annotated, Literal
 
@@ -13,7 +12,7 @@ from pydantic import BaseModel, Field, field_validator
 
 from .auth import attempt, create_session, hash_password, require_user, verify_password
 from .config import CITIES, ROOT, STAGES, Config
-from .db import Database
+from .db import INTEGRITY_ERRORS, Database
 from .documents import process_documents, reset_documents
 from .export import spreadsheet
 from .mail import mail_status, preview, send_digest, valid_email
@@ -102,6 +101,7 @@ def filters(
 def create_app(config=None):
     config = config or Config.from_env()
     db = Database(config)
+    db.bootstrap_owner()
     worker = Worker(db)
 
     @asynccontextmanager
@@ -172,7 +172,7 @@ def create_app(config=None):
         try:
             with db.connect() as conn:
                 conn.execute("INSERT INTO users VALUES (1,?,?)", (body.username, hash_password(body.password)))
-        except sqlite3.IntegrityError:
+        except INTEGRITY_ERRORS:
             raise HTTPException(409, "El acceso privado ya fue creado.") from None
         path.unlink(missing_ok=True)
         return {"username": body.username, "csrf": create_session(db, response)}
@@ -251,7 +251,8 @@ def create_app(config=None):
 
     @app.get("/api/settings", dependencies=[Depends(require_user)])
     def settings():
-        return {"settings": db.settings(), "mail": mail_status(db), "worker_enabled": config.worker_enabled}
+        return {"settings": db.settings(), "mail": mail_status(db), "worker_enabled": config.worker_enabled,
+                "automation": db.sync_status()["automation"]}
 
     @app.put("/api/settings", dependencies=[Depends(require_user)])
     def save_settings(body: Preferences):

@@ -7,7 +7,12 @@ import time
 from contextlib import contextmanager
 from datetime import UTC, datetime
 
+import psycopg
+
 from .config import CITIES, Config
+from .postgres import Connection, connect
+
+INTEGRITY_ERRORS = (sqlite3.IntegrityError, psycopg.IntegrityError)
 
 
 def utcnow():
@@ -76,16 +81,18 @@ class Database:
                 "scan_interval_hours": 6,
             }
             for key, value in defaults.items():
-                db.execute("INSERT OR IGNORE INTO settings VALUES (?,?)", (key, json.dumps(value)))
-        self.path.chmod(0o600)
+                db.execute("INSERT INTO settings VALUES (?,?) ON CONFLICT(key) DO NOTHING", (key, json.dumps(value)))
+        if not config.database_url:
+            self.path.chmod(0o600)
         self.ensure_setup_code()
 
     @contextmanager
     def connect(self):
-        conn = sqlite3.connect(self.path, timeout=30)
-        conn.row_factory = sqlite3.Row
+        conn = connect(self.config.database_url) if self.config.database_url else sqlite3.connect(self.path, timeout=30)
+        if not self.config.database_url:
+            conn.row_factory = sqlite3.Row
         try:
-            yield conn
+            yield Connection(conn) if self.config.database_url else conn
             conn.commit()
         except BaseException:
             conn.rollback()
@@ -103,6 +110,20 @@ class Database:
         except FileExistsError:
             pass
 
+    def bootstrap_owner(self):
+        if not self.config.initial_password or self.initialized():
+            return
+        from .auth import hash_password
+        with self.connect() as db:
+            db.execute("INSERT INTO users VALUES (1,?,?) ON CONFLICT(id) DO NOTHING",
+                       (self.config.initial_username, hash_password(self.config.initial_password)))
+        (self.config.data_dir / "setup-code").unlink(missing_ok=True)
+
+    def city_expression(self, prefix=""):
+        if prefix not in ("", "o."):
+            raise ValueError("Invalid SQL prefix")
+        return f"({prefix}data::jsonb->>'city')" if self.config.database_url else f"json_extract({prefix}data,'$.city')"
+
     def initialized(self):
         with self.connect() as db:
             return bool(db.execute("SELECT 1 FROM users").fetchone())
@@ -114,17 +135,17 @@ class Database:
     def save_settings(self, settings):
         with self.connect() as db:
             for k, v in settings.items():
-                db.execute("INSERT OR REPLACE INTO settings VALUES (?,?)", (k, json.dumps(v)))
+                db.execute("INSERT INTO settings VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value",
+                           (k, json.dumps(v)))
 
     def lease(self, name, seconds=1200):
         owner = secrets.token_hex(16)
         with self.connect() as db:
-            db.execute("BEGIN IMMEDIATE")
-            row = db.execute("SELECT * FROM leases WHERE name=?", (name,)).fetchone()
-            if row and row["until"] > time.time():
-                return None
-            db.execute("INSERT OR REPLACE INTO leases VALUES (?,?,?)", (name, owner, time.time() + seconds))
-        return owner
+            now = time.time()
+            row = db.execute("""INSERT INTO leases VALUES (?,?,?) ON CONFLICT(name) DO UPDATE SET
+                owner=excluded.owner, until=excluded.until WHERE leases.until<=? RETURNING owner""",
+                             (name, owner, now + seconds, now)).fetchone()
+        return row[0] if row else None
 
     def renew(self, name, owner, seconds=1200):
         with self.connect() as db:
@@ -158,6 +179,12 @@ class Database:
         config = self.settings()
         result["documents_paused"] = config.get("documents_paused", False)
         result["documents_message"] = config.get("documents_message", "")
+        result["automation"] = {
+            "web_worker": self.config.worker_enabled,
+            "started": config.get("collector_started"), "finished": config.get("collector_finished"),
+            "status": config.get("collector_status", "unconfigured"),
+            "interval_hours": config["scan_interval_hours"],
+        }
         return result
 
     def upsert(self, item, raw):
@@ -183,7 +210,7 @@ class Database:
             unsupported = str(doc.get("format", "")).lower() in ("zip", "application/zip", "doc", "docx", "xls", "xlsx")
             status = "manual" if unsupported else "pending"
             detail = "Formato no PDF: requiere revisión manual del archivo oficial." if unsupported else ""
-            db.execute("INSERT OR IGNORE INTO documents(key,ocid,url,title,status,detail) VALUES (?,?,?,?,?,?)",
+            db.execute("INSERT INTO documents(key,ocid,url,title,status,detail) VALUES (?,?,?,?,?,?) ON CONFLICT(key) DO NOTHING",
                        (key, ocid, doc["url"], doc.get("title", "Documento oficial"), status, detail))
             if unsupported:
                 db.execute("UPDATE documents SET status='manual',detail=? WHERE key=? AND status IN ('pending','error')",

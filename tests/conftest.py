@@ -1,16 +1,36 @@
+import os
+import uuid
 from datetime import UTC, datetime, timedelta
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
+import psycopg
 import pytest
 from fastapi.testclient import TestClient
 
 from molt.app import create_app
 from molt.config import Config
 from molt.db import Database
+from molt.postgres import connect
 
 
 @pytest.fixture
 def config(tmp_path):
-    return Config(data_dir=tmp_path / "private", worker_enabled=False, mail_to="owner@example.com")
+    url = os.getenv("MOLT_TEST_DATABASE_URL", "")
+    schema = "test_" + uuid.uuid4().hex
+    if url:
+        with connect(url) as conn:
+            conn.execute(psycopg.sql.SQL("CREATE SCHEMA {}").format(psycopg.sql.Identifier(schema)))
+        parts = urlsplit(url)
+        query = dict(parse_qsl(parts.query))
+        query["options"] = "-csearch_path=" + schema
+        url = urlunsplit(parts._replace(query=urlencode(query)))
+    try:
+        yield Config(data_dir=tmp_path / "private", worker_enabled=False,
+                     mail_to="owner@example.com", database_url=url)
+    finally:
+        if url:
+            with connect(os.environ["MOLT_TEST_DATABASE_URL"]) as conn:
+                conn.execute(psycopg.sql.SQL("DROP SCHEMA {} CASCADE").format(psycopg.sql.Identifier(schema)))
 
 
 @pytest.fixture

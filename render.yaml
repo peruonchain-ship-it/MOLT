@@ -1,0 +1,26 @@
+# Free web instance; the persistent database is supplied from the owner's Neon account.
+services:
+  - type: web
+    name: datalicita
+    runtime: python
+    plan: free
+    buildCommand: pip install uv==0.12.23 && uv sync --frozen --no-dev
+    startCommand: uv run --frozen --no-dev python -m molt serve
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.14
+      - key: MOLT_HOST
+        value: 0.0.0.0
+      - key: MOLT_DATA_DIR
+        value: /tmp/datalicita
+      - key: MOLT_SECURE_COOKIES
+        value: "true"
+      - key: MOLT_WORKER_ENABLED
+        value: "false"
+      - key: MOLT_INITIAL_USERNAME
+        value: propietario
+      - key: MOLT_INITIAL_PASSWORD
+        sync: false
+      - key: DATABASE_URL
+        sync: false

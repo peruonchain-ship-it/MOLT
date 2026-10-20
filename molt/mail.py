@@ -125,7 +125,7 @@ def send_digest(db, scheduled_day=None, transport=None):
         else:
             payload = build_payload(db, items)
             with db.connect() as conn:
-                conn.execute("INSERT OR IGNORE INTO mail_outbox VALUES (?,?,?,?)",
+                conn.execute("INSERT INTO mail_outbox VALUES (?,?,?,?) ON CONFLICT(id) DO NOTHING",
                              (identity, json.dumps(payload), "pending", utcnow()))
         try:
             with httpx.Client(timeout=30, transport=transport, follow_redirects=False) as client:
@@ -141,7 +141,7 @@ def send_digest(db, scheduled_day=None, transport=None):
         now = utcnow()
         with db.connect() as conn:
             for item in items:
-                conn.execute("INSERT OR IGNORE INTO deliveries VALUES (?,?,?,?)",
+                conn.execute("INSERT INTO deliveries VALUES (?,?,?,?) ON CONFLICT(recipient,ocid,version) DO NOTHING",
                              (recipient_hash, item["ocid"], item["delivery_key"], now))
             conn.execute("UPDATE mail_outbox SET status='sent' WHERE id=?", (identity,))
             conn.execute("INSERT INTO mail_runs(created_at,status,count,message,provider_id,scheduled_day) VALUES (?,?,?,?,?,?)",

@@ -1,22 +1,21 @@
 import base64
 import io
 import json
+from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 
 import httpx
 import pytest
 from openpyxl import load_workbook
 
-from molt.config import Config
 from molt.db import Database, utcnow
 from molt.mail import build_payload, digest_items, send_digest
 from molt.source import save_release
 
 
 @pytest.fixture
-def mail_db(tmp_path, release):
-    config = Config(data_dir=tmp_path, worker_enabled=False, mail_key="test-key-not-real",
-                    mail_from="radar@example.com", mail_to="owner@example.com")
+def mail_db(config, release):
+    config = replace(config, mail_key="test-key-not-real", mail_from="radar@example.com")
     db = Database(config)
     save_release(db, release)
     with db.connect() as conn:
