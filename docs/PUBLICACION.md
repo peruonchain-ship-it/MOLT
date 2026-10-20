@@ -28,6 +28,14 @@ Para reconstruir el sitio:
 python scripts/build_public_site.py --url https://peruonchain-ship-it.github.io/MOLT/
 ```
 
+Para reconstruir y actualizar la rama pública sin cambiar de checkout:
+
+```bash
+python scripts/publish_public_site.py --url https://peruonchain-ship-it.github.io/MOLT/
+```
+
+El comando publica archivos en GitHub, conserva la rama de trabajo y no fuerza sobrescrituras. No crea worktrees ni activa Pages por sí mismo.
+
 Cuando exista alojamiento para el panel, añade `--private-app-url https://TU-SERVIDOR/app`. No introduzcas contraseñas ni tokens en esa URL. Las instrucciones de contenedor de más abajo son una opción futura, no una contratación ni un despliegue ya realizado.
 
 ## Google
@@ -43,6 +51,14 @@ Una vez que la web esté activa:
 5. Verifica la propiedad y envía `https://peruonchain-ship-it.github.io/MOLT/sitemap.xml`; solicita la indexación de la portada.
 
 No se ha verificado una propiedad de Search Console ni confirmado presencia en resultados. Preparar SEO o publicar una página no demuestra que Google ya la indexó.
+
+## Comprobaciones realizadas
+
+- 62 pruebas automatizadas pasaron; se comprobó también la portada estática en escritorio y móvil, sus recursos, enlaces internos y comportamiento de las preguntas frecuentes.
+- El panel privado pasó la comprobación de navegador con los registros reales existentes, sin publicar esos datos en la portada.
+- Las ramas `main` y `gh-pages` se subieron al repositorio. La actualización estática es repetible y no genera commits duplicados cuando no hay cambios.
+- GitHub rechazó tanto la activación por workflow como la activación desde rama mediante API con HTTP 403. Esto requiere cambiar el ajuste en la cuenta de GitHub; repetir la petición con el mismo acceso no lo resuelve.
+- El contenedor opcional no se completó en este entorno por un fallo de DNS de la red de Docker al descargar dependencias. No es necesario para la publicación gratuita estática y no se presenta como despliegue validado.
 
 ## Aplicación completa y dominio propio, en el futuro
 
